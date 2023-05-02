@@ -13,7 +13,9 @@ public class RequestDto {
 
     @NonNull
     private TypePlayer player;
-    @NonNull
+//    @NonNull
+    private Integer numberGuess;
+//    @NonNull
     private Integer numMatchPlayer;
 
 }

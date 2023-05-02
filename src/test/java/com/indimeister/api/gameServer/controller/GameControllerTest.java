@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.*;
-import com.indimeister.api.gameServer.domain.NimGame;
+import com.indimeister.api.gameServer.domain.entity.NimGame;
 import com.indimeister.api.gameServer.domain.dto.RequestDto;
 
 import org.junit.Test;
@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GameControllerTest {
@@ -69,7 +70,7 @@ public class GameControllerTest {
     @Test
     public void testPlayTurn() {
         Long gameId = 1L;
-        RequestDto dto = new RequestDto(TypePlayer.PLAYER,2);
+        RequestDto dto = new RequestDto(TypePlayer.PLAYER,2,2);
         NimGame game = new NimGame(13, 3);
         when(service.playTurn(gameId, dto)).thenReturn(game);
 
@@ -78,6 +79,21 @@ public class GameControllerTest {
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assert.assertEquals(game, response.getBody());
         verify(service).playTurn(gameId, dto);
+    }
+
+    @Test
+    public void testPlayGuess() {
+        Long gameId = 1L;
+        NimGame game = new NimGame(13, 3);
+        OptionalInt guess = Arrays.stream(game.getNumbersGuess()).findAny();
+        RequestDto dto = new RequestDto(TypePlayer.PLAYER, guess.getAsInt(),2);
+
+        when(service.playTurn(gameId, dto)).thenReturn(game);
+
+        ResponseEntity<NimGame> response = controller.playGuess(gameId, dto);
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).turnPlayGuess(gameId, dto);
     }
 
     @Test

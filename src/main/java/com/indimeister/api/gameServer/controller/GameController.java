@@ -1,7 +1,8 @@
 package com.indimeister.api.gameServer.controller;
 
-import com.indimeister.api.gameServer.domain.NimGame;
+import com.indimeister.api.gameServer.domain.entity.NimGame;
 import com.indimeister.api.gameServer.domain.dto.RequestDto;
+import com.indimeister.api.gameServer.exception.GameException;
 import com.indimeister.api.gameServer.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,16 @@ public class GameController {
             @PathVariable("id") Long id,
             @RequestBody RequestDto dto) {
         return ResponseEntity.ok().body(service.playTurn(id, dto));
+    }
+
+    @PatchMapping("/play/guess/{id}")
+    public ResponseEntity<NimGame> playGuess(
+            @PathVariable("id") Long id,
+            @RequestBody RequestDto dto) {
+        if (dto.getNumberGuess() < 0 || dto.getNumberGuess() > 99) {
+            throw new GameException("Value must be between 0 and 99 in body: {numberGuess}" );
+        }
+        return ResponseEntity.ok().body(service.turnPlayGuess(id, dto));
     }
 
     @DeleteMapping("/play/{id}")

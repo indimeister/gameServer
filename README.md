@@ -36,12 +36,13 @@ When succeeed 200 Status code and created game object are returned.
 Response Example
 ```
 {
-    "id": 2,
+    "id": 1,
     "heapSize": 13,
     "maxMatches": 3,
-    "playerTurn": true,
+    "numberMatch": 1,
+    "playerTurn": false,
     "over": false,
-    "winner": null
+    "winner": "NONE"
 }
 ```
 
@@ -75,14 +76,41 @@ When succeeed 200 Status code and updated game object are returned.
 Response Example
 ```
 {
-    "id": 3,
+    "id": 1,
     "heapSize": 13,
-    "maxMatches": 0,
+    "maxMatches": 3,
+    "numberMatch": 1,
     "playerTurn": false,
-    "over": true,
+    "over": false,
     "winner": "PLAYER"
 }
 ```
+
+### Update play guess
+Request
+```
+/api/play/guess/{id} [PATCH]
+{
+  "player": "PLAYER",
+  "numberGuess": 10
+}
+
+```
+When succeeed 200 Status code and updated game object are returned.
+
+Response Example
+```
+{
+    "id": 1,
+    "heapSize": 13,
+    "maxMatches": 3,
+    "numberMatch": 1,
+    "playerTurn": false,
+    "over": false,
+    "winner": "PLAYER"
+}
+```
+
 ###  Delete a Game
 
 ```

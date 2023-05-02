@@ -1,7 +1,7 @@
 package com.indimeister.api.gameServer.service;
 
 import static org.mockito.Mockito.*;
-import com.indimeister.api.gameServer.domain.NimGame;
+import com.indimeister.api.gameServer.domain.entity.NimGame;
 import com.indimeister.api.gameServer.domain.dto.RequestDto;
 import com.indimeister.api.gameServer.domain.enums.TypePlayer;
 import com.indimeister.api.gameServer.exception.GameException;
@@ -43,8 +43,8 @@ public class GameServiceTest {
         heapSize = 13;
         maxMatch =3;
 
-        game = new NimGame(gameId, 10, 3, true, false, null);
-        requestDto = new RequestDto(TypePlayer.PLAYER,2);
+        game = new NimGame(gameId, 10, 3, 1, true, false, null, new int[5]);
+        requestDto = new RequestDto(TypePlayer.PLAYER,20,2);
     }
 
     @Test
@@ -186,6 +186,25 @@ public class GameServiceTest {
         when(gameRepository.findById(2L)).thenReturn(optionalGame);
 
         gameService.delete(2L);
+    }
+
+    @Test
+    public void testTurnPlayGuess() {
+        game.setNumberMatch(3);
+        game.setNumbersGuess(new int[5]);
+
+        RequestDto dto = new RequestDto();
+        dto.setNumberGuess(5);
+
+        when(gameRepository.findById(anyLong())).thenReturn(java.util.Optional.of(game));
+        when(gameRepository.save(any(NimGame.class))).thenReturn(game);
+
+        NimGame updatedGame = gameService.turnPlayGuess(1L, dto);
+
+        Assertions.assertTrue(updatedGame.isOver());
+        Assertions.assertFalse(updatedGame.isPlayerTurn());
+        Assertions.assertEquals(0, updatedGame.getNumberMatch());
+        Assertions.assertEquals(TypePlayer.COMPUTER, updatedGame.getWinner());
     }
 }
 

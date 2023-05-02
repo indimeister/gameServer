@@ -1,6 +1,6 @@
 package com.indimeister.api.gameServer.service;
 
-import com.indimeister.api.gameServer.domain.NimGame;
+import com.indimeister.api.gameServer.domain.entity.NimGame;
 import com.indimeister.api.gameServer.domain.dto.RequestDto;
 import com.indimeister.api.gameServer.domain.enums.TypePlayer;
 import com.indimeister.api.gameServer.exception.GameException;
@@ -97,6 +97,51 @@ public class GameService {
             game.setOver(true);
             game.setWinner(game.isPlayerTurn() ? TypePlayer.PLAYER : TypePlayer.COMPUTER);
             return Optional.of(gameRepository.save(game)).get();
+        }
+
+        return Optional.of(gameRepository.save(game)).get();
+    }
+
+    /**
+     * Player guess the number Random
+     * @param gameId
+     * @param dto
+     * @return NimGame update
+     */
+    public NimGame turnPlayGuess(Long gameId, RequestDto dto) {
+        Optional<NimGame> gameOpt = gameRepository.findById(gameId);
+        if (!gameOpt.isPresent()) {
+            throw new GameException("Game not found with ID: " + gameId);
+        }
+
+        NimGame game = gameOpt.get();
+        if (game.isOver()) {
+            throw new GameException("Game has already ended.");
+        }
+
+        if (game.getNumberMatch() <= 0
+                && game.getNumberMatch() >= game.getMaxMatches() ) {
+            throw new GameException("Invalid number of matches taken by player: " + game.getNumberMatch());
+        }
+
+        int matchesLeft = game.getMaxMatches() - game.getNumberMatch();
+        game.setNumberMatch(game.getNumberMatch() + 1);
+        game.setPlayerTurn(false);
+
+        if (matchesLeft == 0) {
+            game.setOver(true);
+            game.setWinner(TypePlayer.COMPUTER);
+            return Optional.of(gameRepository.save(game)).get();
+        }
+
+        //Guess?
+        for (int number : game.getNumbersGuess()) {
+            if (dto.getNumberGuess() == number) {
+                game.setOver(true);
+                game.setWinner(TypePlayer.PLAYER);
+                game.setPlayerTurn(true);
+                return Optional.of(gameRepository.save(game)).get();
+            }
         }
 
         return Optional.of(gameRepository.save(game)).get();
