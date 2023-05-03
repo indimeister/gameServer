@@ -192,6 +192,7 @@ public class GameServiceTest {
     public void testTurnPlayGuess() {
         game.setNumberMatch(3);
         game.setNumbersGuess(new int[5]);
+        game.setWinner(TypePlayer.NONE);
 
         RequestDto dto = new RequestDto();
         dto.setNumberGuess(5);
@@ -203,8 +204,28 @@ public class GameServiceTest {
 
         Assertions.assertTrue(updatedGame.isOver());
         Assertions.assertFalse(updatedGame.isPlayerTurn());
-        Assertions.assertEquals(0, updatedGame.getNumberMatch());
+        Assertions.assertEquals(4, updatedGame.getNumberMatch());
         Assertions.assertEquals(TypePlayer.COMPUTER, updatedGame.getWinner());
+    }
+
+    @Test
+    public void testPlayNim() {
+        game.setNumbersGuess(new int[] { 1, 2, 3, 4, 5 });
+        game.setMaxMatches(3);
+        game.setPlayerTurn(false);
+
+        when(gameRepository.findById(1L)).thenReturn(Optional.of(game));
+        when(gameRepository.save(any(NimGame.class))).thenReturn(game);
+
+        requestDto.setNumMatchPlayer(2);
+
+        NimGame updatedGame = gameService.playNim(1L, requestDto);
+
+        Assertions.assertFalse(updatedGame.isOver());
+        Assertions.assertNull(updatedGame.getWinner());
+        Assertions.assertFalse(Arrays.equals(new int[] { 3, 4, 5 }, updatedGame.getNumbersGuess()));
+
+        verify(gameRepository, times(1)).save(game);
     }
 }
 

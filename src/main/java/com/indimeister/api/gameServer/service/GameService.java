@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -144,6 +146,74 @@ public class GameService {
             }
         }
 
+        return Optional.of(gameRepository.save(game)).get();
+    }
+    public NimGame playNim(Long gameId, RequestDto dto) {
+        Optional<NimGame> gameOpt = gameRepository.findById(gameId);
+        if (!gameOpt.isPresent()) {
+            throw new GameException("Game not found with ID: " + gameId);
+        }
+
+        NimGame game = gameOpt.get();
+        if (game.isOver()) {
+            throw new GameException("Game has already ended.");
+        }
+
+        if (dto.getNumMatchPlayer() > 0
+                && dto.getNumMatchPlayer() > game.getMaxMatches()) {
+            throw new GameException("Invalid number of matches taken by player: " + game.getNumberMatch());
+        }
+        Random random = new Random();
+        int numToRemove = 0;
+        int numMatchesComputer = ThreadLocalRandom.current().nextInt(1, Math.min(game.getMaxMatches(), 4));
+
+        for (int number = 0; number < 2; number++) {//2 = 1 time computer/1 time player
+            if (game.getNumbersGuess().length > 0) {
+                if (!game.isPlayerTurn()) {
+                    // Computer's turn
+                    numToRemove = random.nextInt(numMatchesComputer) +1;
+                    removeMatchesFromGame(game, numToRemove, true);
+
+                } else {
+                    // player's turn
+                    numToRemove = dto.getNumMatchPlayer();
+                    removeMatchesFromGame(game, numToRemove, false);
+                }
+            } else {
+                determineWinner(game);
+            }
+        }
+        return Optional.of(gameRepository.save(game)).get();
+    }
+
+    /**
+     * Remove game
+     * @param game
+     * @param numToRemove
+     * @param playerTurn
+     */
+    private void removeMatchesFromGame(NimGame game, int numToRemove, boolean playerTurn) {
+        if (numToRemove < game.getNumbersGuess().length) {
+            int[] newNumbersGuess = new int[game.getNumbersGuess().length - numToRemove];
+            System.arraycopy(game.getNumbersGuess(), numToRemove, newNumbersGuess, 0, newNumbersGuess.length);
+            game.setNumbersGuess(newNumbersGuess);
+            game.setPlayerTurn(playerTurn);//next is
+        } else {
+            determineWinner(game);
+        }
+    }
+
+    /**
+     * How win?
+     *
+     * @param game
+     * @return
+     */
+    private NimGame determineWinner(NimGame game){
+        // Determine winner
+        game.setOver(true);
+        game.setWinner(game.isPlayerTurn() ? TypePlayer.PLAYER : TypePlayer.COMPUTER);
+        game.setPlayerTurn(!game.isPlayerTurn());
         return Optional.of(gameRepository.save(game)).get();
     }
 

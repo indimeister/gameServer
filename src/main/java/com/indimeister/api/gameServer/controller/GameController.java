@@ -56,6 +56,13 @@ public class GameController {
         return ResponseEntity.ok().body(service.turnPlayGuess(id, dto));
     }
 
+    @PatchMapping("/play/nim/{id}")
+    public ResponseEntity<NimGame> updateNIM(
+            @PathVariable("id") Long id,
+            @RequestBody RequestDto dto) {
+        return ResponseEntity.ok().body(service.playNim(id, dto));
+    }
+
     @DeleteMapping("/play/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);

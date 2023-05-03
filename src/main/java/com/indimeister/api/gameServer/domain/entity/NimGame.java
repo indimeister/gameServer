@@ -34,7 +34,7 @@ public class NimGame{
        this.over = false;
        this.playerTurn = true;
        this.numbersGuess = randomNumbers(heapSize);
-       this.numberMatch = 0;
+       this.numberMatch = 1;
        this.winner = TypePlayer.NONE;
     }
 
